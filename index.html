@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Applicant Appointment Reminder — Email & SMS</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">
+          DS
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-semibold text-slate-900 leading-tight">Appointment Reminder</h1>
+          <p class="text-xs text-slate-500">Applicant Email & SMS</p>
+        </div>
+      </div>
+
+      <button onclick="resetApplicantView()" class="text-xs font-medium text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+        Reset
+      </button>
+    </div>
+  </header>
+
+  <!-- Confirmation Pop-up Modal -->
+  <div id="confirmation-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs transition-opacity" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-sm w-full p-6 text-center transform transition-all">
+      <div id="modal-icon-container" class="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-4">
+        <!-- Icon injected dynamically -->
+      </div>
+      <span id="modal-repeat-badge" class="hidden inline-block mb-2 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+        Already Recorded
+      </span>
+      <h3 id="modal-title" class="text-lg font-bold text-slate-900"></h3>
+      <p id="modal-message" class="text-sm text-slate-600 mt-2 leading-relaxed"></p>
+      <button onclick="closeModal()" class="mt-6 w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm transition cursor-pointer">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content Area: Applicant Email & SMS Only -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- Left Column: Applicant Email Preview -->
+      <div class="lg:col-span-7 space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-slate-900">Applicant Email</h2>
+          <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            No health or test info included
+          </span>
+        </div>
+
+        <!-- Email Client Frame -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="bg-slate-100 px-5 py-3.5 border-b border-slate-200 text-xs text-slate-600 space-y-1">
+            <div><span class="font-semibold text-slate-800">To:</span> jordan.taylor@example.com</div>
+            <div><span class="font-semibold text-slate-800">Subject:</span> Reminder: Your clinic appointment today</div>
+          </div>
+
+          <!-- Email Body -->
+          <div class="p-6 sm:p-8 bg-white">
+            <div class="max-w-md mx-auto">
+              <p class="text-sm text-slate-600 mb-4">Hi Jordan,</p>
+              <p class="text-sm text-slate-700 leading-relaxed mb-4">
+                This is a reminder about your scheduled clinic appointment today at <strong class="font-semibold text-slate-900">Downtown Health Clinic</strong> (opens at 8:00 AM).
+              </p>
+              <p class="text-sm text-slate-700 leading-relaxed mb-6">
+                Please confirm whether you visited the clinic today:
+              </p>
+
+              <!-- Action Buttons -->
+              <div class="flex flex-col sm:flex-row gap-3 mb-8">
+                <button onclick="openConfirmationModal('yes')" class="flex-1 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold text-center shadow-sm transition cursor-pointer">
+                  Yes, I visited
+                </button>
+                <button onclick="openConfirmationModal('no')" class="flex-1 py-3 px-4 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 text-sm font-semibold text-center shadow-xs transition cursor-pointer">
+                  No, I didn't go
+                </button>
+              </div>
+
+              <!-- Footer with tiny centered "stop" link -->
+              <div class="border-t border-slate-100 pt-5 text-center">
+                <p class="text-xs text-slate-400 mb-3">
+                  Please bring a valid government-issued photo ID.
+                </p>
+                <button onclick="openConfirmationModal('stop')" class="text-[11px] text-slate-400 hover:text-slate-600 underline decoration-slate-300 underline-offset-2 transition cursor-pointer">
+                  stop
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Applicant SMS Preview -->
+      <div class="lg:col-span-5 space-y-3">
+        <h2 class="text-base font-bold text-slate-900">Applicant SMS</h2>
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="text-xs font-medium text-slate-500">Clinic Reminder SMS</span>
+          </div>
+
+          <div class="bg-slate-100 rounded-2xl rounded-tl-sm p-4 text-sm text-slate-800 leading-relaxed border border-slate-200/70">
+            Reminder: You have a scheduled clinic visit today at Downtown Health Clinic (opens 8:00 AM). Confirm your visit: https://portal.example.com/v/9f8a2b or reply STOP to opt out.
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+            <span class="text-xs text-slate-500">Simulate SMS reply:</span>
+            <button onclick="openConfirmationModal('sms-stop')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition cursor-pointer">
+              Reply "STOP"
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // Track the first confirmed response so repeat clicks show the same confirmation cleanly
+    let recordedResponse = null;
+
+    // Pop-up modal content configurations
+    const MODAL_CONTENT = {
+      yes: {
+        title: 'Visit Confirmed',
+        message: 'Thank you for confirming that you visited the clinic today. You will no longer receive appointment reminders.',
+        iconBg: 'bg-emerald-50 text-emerald-600 border border-emerald-200',
+        iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+      },
+      no: {
+        title: 'Response Recorded',
+        message: 'Thank you for letting us know you did not go today. Reminders have been stopped and our team will follow up to help reschedule.',
+        iconBg: 'bg-amber-50 text-amber-600 border border-amber-200',
+        iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>'
+      },
+      stop: {
+        title: 'Reminders Stopped',
+        message: 'You have unsubscribed from automated reminders for this appointment. No further messages will be sent.',
+        iconBg: 'bg-slate-100 text-slate-700 border border-slate-200',
+        iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>'
+      },
+      'sms-stop': {
+        title: 'SMS Reminders Stopped',
+        message: 'We received your STOP reply. Automated SMS and email reminders for this appointment have been stopped.',
+        iconBg: 'bg-slate-100 text-slate-700 border border-slate-200',
+        iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>'
+      }
+    };
+
+    // Open confirmation pop-up modal
+    function openConfirmationModal(actionKey) {
+      let isRepeat = false;
+
+      if (recordedResponse === null) {
+        recordedResponse = actionKey;
+      } else {
+        isRepeat = true;
+      }
+
+      const activeKey = recordedResponse;
+      const config = MODAL_CONTENT[activeKey];
+
+      const iconContainer = document.getElementById('modal-icon-container');
+      iconContainer.className = `w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-4 ${config.iconBg}`;
+      iconContainer.innerHTML = config.iconSvg;
+
+      document.getElementById('modal-repeat-badge').classList.toggle('hidden', !isRepeat);
+      document.getElementById('modal-title').textContent = config.title;
+      document.getElementById('modal-message').textContent = config.message;
+
+      document.getElementById('confirmation-modal').classList.remove('hidden');
+    }
+
+    // Close confirmation pop-up modal
+    function closeModal() {
+      document.getElementById('confirmation-modal').classList.add('hidden');
+    }
+
+    // Reset recorded click state
+    function resetApplicantView() {
+      recordedResponse = null;
+      closeModal();
+    }
+
+    // Close modal when clicking backdrop or pressing Escape
+    document.getElementById('confirmation-modal').addEventListener('click', function (e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>
